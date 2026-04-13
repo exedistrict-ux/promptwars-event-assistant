@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Event Experience Assistant | Stadium</title>
+    <!-- Use Google Fonts for Modern Typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="app-container">
+        
+        <header class="app-header">
+            <div class="header-content">
+                <h1>Stadium Assistant</h1>
+                <div class="live-indicator"><span class="pulse-dot"></span>Live Data</div>
+            </div>
+            <div class="header-bg"></div>
+        </header>
+
+        <main class="app-content">
+            
+            <!-- Crowd View -->
+            <section id="view-crowd" class="view-section active">
+                <div class="section-header">
+                    <h2 class="section-title">Crowd Levels</h2>
+                    <p class="section-desc">Real-time occupancy across the venue.</p>
+                </div>
+                
+                <div class="card-group" id="gates-container">
+                    <h3>Gates</h3>
+                    <div class="loading-shimmer card list-card"></div>
+                    <!-- Injected by JS -->
+                </div>
+                
+                <div class="card-group" id="sections-container">
+                    <h3>Sections</h3>
+                    <div class="loading-shimmer card list-card"></div>
+                    <!-- Injected by JS -->
+                </div>
+            </section>
+
+            <!-- Wait Times View -->
+            <section id="view-wait" class="view-section hidden">
+                <div class="section-header">
+                    <h2 class="section-title">Wait Times</h2>
+                    <p class="section-desc">Current estimated queueing times.</p>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card card">
+                        <i class="fa-solid fa-burger stat-icon"></i>
+                        <span class="stat-label">Food Avg</span>
+                        <div class="stat-value" id="avg-food-wait">--</div>
+                        <span class="stat-unit">mins</span>
+                    </div>
+                    <div class="stat-card card">
+                        <i class="fa-solid fa-car stat-icon"></i>
+                        <span class="stat-label">Parking Avg</span>
+                        <div class="stat-value" id="avg-park-wait">--</div>
+                        <span class="stat-unit">mins</span>
+                    </div>
+                </div>
+
+                <div class="card-group" id="specific-wait-container">
+                    <h3>Detailed Breakdown</h3>
+                    <!-- Injected by JS -->
+                </div>
+            </section>
+            
+            <!-- Navigation View -->
+            <section id="view-nav" class="view-section hidden">
+                <div class="section-header">
+                    <h2 class="section-title">Navigation</h2>
+                    <p class="section-desc">Recommended rapid paths around the stadium.</p>
+                </div>
+                
+                <div class="route-search card">
+                    <div class="search-box">
+                        <i class="fa-solid fa-location-dot"></i>
+                        <input type="text" placeholder="Search destination... (demo)" readonly>
+                    </div>
+                </div>
+
+                <div class="card-group nav-cards" id="routes-container">
+                    <!-- Injected by JS -->
+                </div>
+            </section>
+
+            <!-- Live Updates & Facilities View -->
+            <section id="view-updates" class="view-section hidden">
+                <div class="section-header">
+                    <h2 class="section-title">Live Updates</h2>
+                    <p class="section-desc">Announcements and facility operations.</p>
+                </div>
+                
+                <div class="updates-ticker" id="live-updates-container">
+                    <!-- Injected by JS -->
+                </div>
+
+                <div class="card-group" id="facilities-container">
+                    <h3>Facilities Status</h3>
+                    <!-- Injected by JS -->
+                </div>
+            </section>
+
+        </main>
+
+        <nav class="bottom-nav">
+            <a href="#" class="nav-item active" data-target="view-crowd">
+                <i class="fa-solid fa-users"></i>
+                <span>Crowd</span>
+            </a>
+            <a href="#" class="nav-item" data-target="view-wait">
+                <i class="fa-solid fa-clock"></i>
+                <span>Waits</span>
+            </a>
+            <a href="#" class="nav-item" data-target="view-nav">
+                <i class="fa-solid fa-map-location-dot"></i>
+                <span>Navigate</span>
+            </a>
+            <a href="#" class="nav-item" data-target="view-updates">
+                <i class="fa-solid fa-bell"></i>
+                <span>Updates</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
