@@ -5,17 +5,24 @@ from flask import Flask, jsonify, render_template, request
 from flask_cors import CORS
 from flask_caching import Cache
 from datetime import datetime
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 CORS(app)
 cache = Cache(app, config={'CACHE_TYPE': 'simple'})
 
-GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', 'AIzaSyDemo123')
-try:
-    genai.configure(api_key=GEMINI_API_KEY)
-    model = genai.GenerativeModel('gemini-1.5-flash')
-except:
-    model = None
+GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', '')
+model = None
+if GEMINI_API_KEY:
+    try:
+        genai.configure(api_key=GEMINI_API_KEY)
+        model = genai.GenerativeModel('gemini-1.5-flash')
+        logger.info("Gemini AI initialized successfully")
+    except Exception as e:
+        logger.error(f"Gemini init failed: {e}")
 
 GATES = ['Gate A (North)', 'Gate B (East)', 'Gate C (South)', 'Gate D (West)']
 SECTIONS = ['Section 101L', 'Section 102L', 'Section 103M', 'Section 104M', 'VIP Box 1', 'VIP Box 2']
@@ -45,6 +52,13 @@ def get_random_level():
 
 def get_wait_time(base, variance):
     return max(0, base + random.randint(-variance, variance))
+
+def validate_question(question):
+    if not question or not isinstance(question, str):
+        return False
+    if len(question) > 500:
+        return False
+    return True
 
 @app.route('/')
 def index():
@@ -104,20 +118,37 @@ def navigation():
 @app.route('/api/ai-assist', methods=['POST'])
 def ai_assist():
     try:
-        data = request.get_json()
+        data = request.get_json(silent=True)
+        if not data:
+            return jsonify({'error': 'Invalid request'}), 400
         question = data.get('question', '')
+        if not validate_question(question):
+            return jsonify({'error': 'Invalid question'}), 400
         if model and question:
-            prompt = f"You are a helpful stadium assistant for a 50000 capacity cricket stadium. Answer this visitor question briefly: {question}"
+            prompt = f"You are a helpful stadium assistant for a 50000 capacity cricket stadium. Answer this visitor question briefly and safely: {question}"
             response = model.generate_content(prompt)
             return jsonify({'answer': response.text, 'source': 'gemini'})
         else:
             return jsonify({'answer': 'Please ask about gates, parking, food stalls, or facilities!', 'source': 'fallback'})
     except Exception as e:
+        logger.error(f"AI assist error: {e}")
         return jsonify({'answer': 'I can help you with crowd levels, wait times, and navigation!', 'source': 'fallback'})
 
 @app.route('/health')
 def health():
-    return jsonify({'status': 'healthy', 'google_services': 'gemini-integrated'})
+    return jsonify({
+        'status': 'healthy',
+        'google_services': 'gemini-integrated',
+        'gemini_active': model is not None
+    })
+
+@app.errorhandler(404)
+def not_found(e):
+    return jsonify({'error': 'Resource not found'}), 404
+
+@app.errorhandler(500)
+def server_error(e):
+    return jsonify({'error': 'Internal server error'}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=False, host='0.0.0.0', port=5000)
